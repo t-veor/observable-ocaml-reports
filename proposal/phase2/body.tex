@@ -31,7 +31,8 @@ C for which they could've been mapped to, but also to maintain
 ``observability'' these must be ``transparent'' to the debugger (for example, a
 polymorphic function of the type \verb!'a -> 'a! that has been instantiated as
 the type \verb!int -> int! should have this quality be visible from the
-debugger).
+debugger). These qualities can be implemented using user-defined commands for
+\texttt{gdb}.
 
 The resulting compiler can be evaluated in mainly two contexts. One of these is
 a straightforward performance comparison, where a testbed of OCaml programs are
@@ -43,25 +44,16 @@ made in comparison with OCaml's bytecode debugger, \texttt{ocamldebug}.
 
 \section*{Resources Required}
 
-A copy of the source of the OCaml compiler is needed, as well as C compilation
-tools such as \texttt{gcc}, and debuggers such as \texttt{gdb}. Fortunately,
-these tools are maintained via open source and are readily available online at
-\url{github.com/ocaml/ocaml}, \url{gcc.gnu.org}, and
-\url{www.gnu.org/software/gdb} respectively.
-
-Later in the project, implementing certain more advanced features may require
-the uses of libraries such as \texttt{libffi} (\url{sourceware.org/libffi}),
-\texttt{liballocs} (\url{github.com/stephenrkell/liballocs}), or the Boehm
-garbage collector (\url{http://www.hboehm.info/gc/}); these libraries are all
-open source and readily available.
+No special resouces are requred that are not open source and freely available
+for download.
 
 \section*{Starting Point}
 
 The project, at least initially, will be a fork of the OCaml compiler
 obtainable at \url{github.com/ocaml/ocaml} which will take the same front-end
 as the existing compiler, but will implement a new back-end for compilation
-into C. Apart from other resources indicated in the previous section, no other
-relevant significant bodies of code have been determined for use at this point.
+into C. The work may use other libraries such as \texttt{libffi} and
+\texttt{liballocs} but no work of similar scope to the project.
 
 \section*{Substance and Structure of the Project}
 
@@ -136,13 +128,18 @@ compiler will match the performance of OCaml official compilers, the goal is to
 be within a reasonable margin so that the performance of compiled C code is
 comparable.
 
-The other method will be to compare the debug outputs of the C code and the
-OCaml code. The native OCaml compiler does not allow observation of locally
-bound values at all, so our C compiler should beat this easily; although a more
-interesting comparison would be with the OCaml bytecode debugger. Breakpoints
-could be set at randomly chosen call sites, and the stack traces, visible
-locals etc.\ could be compared between \texttt{ocamldebug} and the debug output
-of the C code.
+The other method will be the evaluation of the ``observability'' of the C code.
+This will take place in two parts: firstly, we can do a test for
+``observability'': this will entail a minimum list of requirements, such as
+ability to step through OCaml code, ability to print locally bound values,
+ability to print types of locally bound variables, and ability to show
+instantiation of polymorphic functions into specific types. The second is to
+compare the debug outputs of the C code and the OCaml code. The native OCaml
+compiler does not allow observation of locally bound values at all, so our C
+compiler should beat this easily; although a more interesting comparison would
+be with the OCaml bytecode debugger. Breakpoints could be set at randomly
+chosen call sites, and the stack traces, visible locals etc.\ could be compared
+between \texttt{ocamldebug} and the debug output of the C code.
 
 \subsection*{Extension Tasks}
 
@@ -178,6 +175,26 @@ The following criteria should be achieved at the completion of the project:
     \item ``Observability'' in the compiled executable achieved, with tools
         such as \texttt{gdb} providing a coherent OCaml view of the execution
         of the program.
+
+        This will involve the following:
+
+        \begin{itemize}
+
+            \item Ability to set breakpoints and step through the compiled executable
+                as if it was OCaml code;
+
+            \item Ability to view locally bound variables, and their types;
+
+            \item Ability to print more complex data structures, such as ADTs,
+                record types and lists;
+
+            \item Ability to view the instantiated type of a polymorphic
+                function;
+
+            \item Similar and comparable output between the debug output and
+                the same code running in \texttt{ocamldebug}.
+
+        \end{itemize}
 
 \end{itemize}
 
@@ -245,10 +262,9 @@ Progress Report. Prepare Progress Report presentation.
 
 \subsection*{10 February --- 23 February}
 
-Start work on dissertation, as well as the implementation of extension tasks,
-which will likely be ways of making the compiled code more performant.
-Investigation and use of perhaps \texttt{libffi} and \texttt{liballocs} to
-improve performance and observability.
+Start work on dissertation, as well as the implementation of ways of making the
+compiled code more performant. Investigation and use of perhaps \texttt{libffi}
+and \texttt{liballocs} to improve performance and observability.
 
 Milestones: The introduction and preparation sections of the dissertation
 complete. Improvements on the compiler made, with evaluation results to show
@@ -256,8 +272,9 @@ improvements in performance of the compiled output.
 
 \subsection*{24 February --- 9 March}
 
-Start writing the implementation section of dissertation. Implementation of
-further extension tasks, likely custom formatters to improve the debug output.
+Start writing the implementation section of dissertation. Implementation of the
+generation of custom formatters for \texttt{gdb}, which will make the debug
+output easier to read and interpret as OCaml values.
 
 Milestones: Implementation section of the dissertation at least half complete.
 Improvements to debug output of debuggers run on the compiled executables.
