@@ -95,13 +95,13 @@ Subset 2 will focus on the implementation of types and polymorphism, and
 will support tuples, lists, parametric polymorphism, algebraic data
 types, record types, and `match` expressions.
 
-The implementation of this subset will likely require the design of an
-object representation for OCaml values. Tuples and record types map
-easily to structs in C, while a tagged union can be used for OCaml’s
-“sum of products” approach to algebraic data types. On the first pass,
-it is quite likely that a naive “tagged pointer” type will be used for
-support for polymorphism, but extension tasks may experiment with
-eliminating this need via some method.
+The implementation of this subset will require the design of an object
+representation for OCaml values. Tuples and record types map easily to
+structs in C, while a tagged union can be used for OCaml’s “sum of
+products” approach to algebraic data types. On the first pass, it is
+quite likely that a naive “tagged pointer” type will be used for support
+for polymorphism, but extension tasks may experiment with eliminating
+this need via some method.
 
 The addition of algebraic data types greatly increases the scope of
 supported programs, and allows for functions taking multiple arguments
@@ -142,7 +142,19 @@ benchmarking performance of the test programs with the existing OCaml
 native compiler and the OCaml bytecode compiler. While it is not
 expected that the C compiler will match the performance of OCaml
 official compilers, the goal is to be within a reasonable margin so that
-the performance of compiled C code is comparable.
+the performance of compiled C code is comparable. The performance
+evaluation will be a simple measurement of the runtime of the compiled
+executable in relation to the running time of the executable produced by
+the OCaml native compiler and the running time of the interpreter on the
+bytecode produced by the OCaml bytecode compiler. The test suite for the
+performance evaluation will have to be partly written as part of the
+project, and partly adapted from the existing OCaml compiler test suite
+([github.com/ocaml/ocaml/tree/trunk/testsuite](github.com/ocaml/ocaml/tree/trunk/testsuite))
+or possibly the Computer Language Benchmarks Game
+([benchmarksgame.alioth.debian.org](benchmarksgame.alioth.debian.org)).
+Since the compilation source is only a subset of OCaml, not all of the
+existing test suite programs will be relevant, and others will require
+some adaptation for them to work for the project.
 
 The other method will be the evaluation of the “observability” of the C
 code. This will take place in two parts: firstly, we can do a test for
@@ -189,27 +201,36 @@ project:
 -   A working compiler, that is able to compile the language as
     described in Subset 3 into C code correctly;
 
--   Comparable performance between the output of the compiler and the
-    OCaml native and bytecode compilers;
+-   An evaluation of performance between the output of the compiler and
+    the OCaml native and bytecode compilers;
 
--   “Observability” in the compiled executable achieved, with tools such
-    as `gdb` providing a coherent OCaml view of the execution of
-    the program.
+-   An evaluation of “observability” in the compiled executable with
+    tools such as `gdb`.
 
-    This will involve the following:
+    The evaluation should focus on the following:
 
     -   Ability to set breakpoints and step through the compiled
         executable as if it was OCaml code;
 
-    -   Ability to view locally bound variables, and their types;
+    -   Ability to view locally bound variables, and their types,
+        although perhaps only as a C “version” of the resulting data;
 
     -   Ability to print more complex data structures, such as ADTs,
         record types and lists;
 
-    -   Ability to view the instantiated type of a polymorphic function;
-
     -   Similar and comparable output between the debug output and the
         same code running in `ocamldebug`.
+
+Further success criteria, which are not expected to be achieved through
+the core project, but interesting as extension tasks may be:
+
+-   Ability to view the instantiated types of polymorphic functions;
+
+-   Ability to view data formatted as OCaml values, using specially
+    written formatters for `gdb`;
+
+-   Any number of optimisations on the generated code, resulting in
+    better performance benchmarks.
 
 Timetable and Milestones
 ========================
