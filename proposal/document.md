@@ -119,10 +119,11 @@ The implementation of this subset will require some representation of
 closures. While C does support function pointers, it has no lexical
 closures and as such a representation where closures are function
 pointers with an extra `void *` pointer that refers to data in the
-closure. As an extension task, more performant ways of implementing
-closures may be investigated, such as potentially dynamically generating
-entry points that push the required arguments before jumping to the body
-of the function.
+closure is likely to be the implementation on the first pass. As an
+extension task, more performant ways of implementing closures may be
+investigated, such as potentially dynamically generating entry points
+that push the required arguments before jumping to the body of the
+function.
 
 The addition of these features will make higher-order functions
 representable, and make available functions such as `map`, `filter`,
@@ -340,3 +341,9 @@ Final adjustments and revisions to dissertation and the body of code.
 Prepare for submission of dissertation.
 
 Milestone: Submission of dissertation.
+
+Resource Declaration
+====================
+
+No special resources are required for this project other than those that
+are not already available as open source code.
