@@ -1,0 +1,50 @@
+(gdb) l
+1       let sum xs =
+2         let rec go acc = function
+3           | x :: xs -> go (acc + x) xs
+4           | [] -> acc
+5         in go 0 xs
+6
+7       let a = sum [3]
+(gdb) tb 2
+Temporary breakpoint 1 at 0x400690: tests/observability/sum.ml:2. (2 locations)
+(gdb) r
+Starting program: tests/observability/sum 
+
+Temporary breakpoint 1, func_1233 (xs_1205=...) at tests/observability/sum.ml:2
+2         let rec go acc = function
+(gdb) s
+5         in go 0 xs
+(gdb) s
+local_func_1215 (acc_1207=0, param_1210=..., closure_obj_1214=0x602050) at tests/observability/sum.ml:2
+2         let rec go acc = function
+(gdb) s
+3           | x :: xs -> go (acc + x) xs
+(gdb) p x_1208 
+$1 = 3
+(gdb) p acc_1207 
+$2 = 0
+(gdb) p xs_1209 
+$3 = {i = 1, block = 0x1}
+(gdb) s
+local_func_1215 (acc_1207=3, param_1210=..., closure_obj_1214=0x602050) at tests/observability/sum.ml:2
+2         let rec go acc = function
+(gdb) 
+4           | [] -> acc
+(gdb) finish
+Run till exit from #0  local_func_1215 (acc_1207=3, param_1210=..., closure_obj_1214=0x602050) at tests/observability/sum.ml:4
+0x0000000000400740 in local_func_1215 (acc_1207=0, param_1210=..., closure_obj_1214=0x602050) at tests/observability/sum.ml:3
+3           | x :: xs -> go (acc + x) xs
+Value returned is $4 = 3
+(gdb) finish
+Run till exit from #0  0x0000000000400740 in local_func_1215 (acc_1207=0, param_1210=..., closure_obj_1214=0x602050) at tests/observability/sum.ml:3
+0x0000000000400854 in func_1233 (xs_1205=...) at tests/observability/sum.ml:5
+5         in go 0 xs
+Value returned is $5 = 3
+(gdb) finish
+Run till exit from #0  0x0000000000400854 in func_1233 (xs_1205=...) at tests/observability/sum.ml:5
+0x0000000000400882 in closure_promote_1236 (closure_arg_1235=..., closure_arg_1234=0x602010) at tests/observability/sum.ml:7
+7       let a = sum [3]
+Value returned is $6 = 3
+(gdb) 
+
