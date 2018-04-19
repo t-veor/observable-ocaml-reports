@@ -1,0 +1,14 @@
+\begin{tikzpicture}[
+blank/.style={node distance=0.8cm, font=\ttfamily},
+block/.style={rectangle, text centered, thick, draw=black, font=\ttfamily,
+    minimum width=3cm, minimum height=0.8cm, node distance=0.8cm},
+block-header/.style={block, node distance=5cm},
+block-body/.style={block},
+line/.style={draw, thick, *-latex', shorten <=-1.2mm}
+]
+
+\node [block-header] (size) {size = 2};
+\node [block-body, below of=size] (tag) {tag = 0};
+\node [block-body, below of=tag] (data-0) {data[0]};
+\node [block-body, below of=data-0] (data-1) {data[1]};
+\end{tikzpicture}

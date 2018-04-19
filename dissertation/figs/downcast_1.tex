@@ -1,0 +1,27 @@
+\begin{tikzpicture}[
+blank/.style={node distance=0.8cm, font=\ttfamily},
+block/.style={rectangle, text centered, thick, draw=black, font=\ttfamily,
+minimum width=3cm, minimum height=0.8cm, node distance=0.8cm},
+block-header/.style={block, node distance=5cm},
+block-body/.style={block},
+line/.style={draw, thick, *-latex', shorten <=-1.2mm}
+]
+
+\node [block-header] (h) {\&h};
+\node [blank, above of=h] (cl-h) {\verb|*cl_h|};
+\node [block-body, below of=h] (h-next) {\verb|cl_g|};
+\node [block-body, below of=h-next] (b) {b};
+
+\node [block-header, right of=h] (g) {\&g};
+\node [blank, above of=g] (cl-g) {\verb|*cl_g|};
+\node [block-body, below of=g] (g-next) {\verb|cl_f|};
+\node [block-body, below of=g-next] (a) {a};
+
+\node [block-header, right of=g] (f) {\&f};
+\node [blank, above of=f] (cl-f) {\verb|*cl_f|};
+\node [block-body, below of=f] (f-next) {NULL};
+
+\path [line] (h-next) edge[out=0, in=180, looseness=.9] (g);
+\path [line] (g-next) edge[out=0, in=180, looseness=.9] (f);
+
+\end{tikzpicture}

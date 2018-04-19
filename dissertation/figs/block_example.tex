@@ -1,0 +1,48 @@
+\begin{tikzpicture}[
+blank/.style={node distance=0.8cm, font=\ttfamily},
+block/.style={rectangle, text centered, thick, draw=black, font=\ttfamily,
+    minimum width=3cm, minimum height=0.8cm, node distance=0.8cm},
+block-header/.style={block, node distance=5cm},
+block-body/.style={block},
+line/.style={draw, thick, *-latex', shorten <=-1.2mm}
+]
+
+\node [block-header] (a-size) {size = 2};
+\node [block-body, below of=a-size] (a-tag) {tag = 0};
+\node [block-body, below of=a-tag] (a-data-0) {};
+\node [block-body, below of=a-data-0] (a-data-1) {};
+
+\node [block-header, right of=a-size] (b-size) {size = 2};
+\node [block-body, below of=b-size] (b-tag) {tag = 0};
+\node [block-body, below of=b-tag] (b-data-0) {};
+\node [block-body, below of=b-data-0] (b-data-1) {};
+
+\node [block-header, right of=b-size] (c-size) {size = 2};
+\node [block-body, below of=c-size] (c-tag) {tag = 0};
+\node [block-body, below of=c-tag] (c-data-0) {};
+\node [block-body, below of=c-data-0] (c-data-1) {0};
+
+\node [block-header, below right of=a-data-1, node distance=3cm] (d-size) {size 
+= 1};
+\node [block-body, below of=d-size] (d-tag) {tag = 253};
+\node [block-body, below of=d-tag] (d-data-0) {1.0};
+
+\node [block-header, below right of=b-data-1, node distance=3cm] (e-size) {size 
+= 1};
+\node [block-body, below of=e-size] (e-tag) {tag = 253};
+\node [block-body, below of=e-tag] (e-data-0) {2.0};
+
+\node [block-header, below right of=c-data-1, node distance=3cm] (f-size) {size 
+= 1};
+\node [block-body, below of=f-size] (f-tag) {tag = 253};
+\node [block-body, below of=f-tag] (f-data-0) {3.0};
+
+\path [line] (a-data-0.center) to [out=0, in=90, looseness=1.5] (d-size);
+\path [line] (a-data-1.center) to [out=0, in=180, looseness=2] (b-size);
+
+\path [line] (b-data-0.center) to [out=0, in=90, looseness=1.5] (e-size);
+\path [line] (b-data-1.center) to [out=0, in=180, looseness=2] (c-size);
+
+\path [line] (c-data-0.center) to [out=0, in=90, looseness=1.5] (f-size);
+
+\end{tikzpicture}

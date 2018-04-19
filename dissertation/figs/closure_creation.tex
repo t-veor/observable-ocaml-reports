@@ -1,0 +1,67 @@
+\begin{lstlisting}[basicstyle=\linespread{0.8}\ttfamily\footnotesize,
+basewidth={.4em,.2em}, frame=single]
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 18.87      0.10     0.10 20000004     0.00     0.00  $\cbox{green!25}{camlTest\char`_std\char`_\char`_compose\char`_1267}$
+  9.43      0.15     0.05  5000001     0.00     0.00  $\cbox{green!25}{camlTest\char`_std\char`_\char`_lens\char`_rect\char`_area\char`_1376}$
+  9.43      0.20     0.05  5000001     0.00     0.00  $\cbox{green!25}{caml\char`_ml\char`_output\char`_bytes}$
+  5.66      0.23     0.03 10000002     0.00     0.00  $\cbox{green!25}{camlCamlinternalFormat\char`_\char`_output\char`_acc\char`_64856}$
+  5.66      0.26     0.03  5000005     0.00     0.00  $\cbox{red!25}{caml\char`_alloc\char`_string}$
+  5.66      0.29     0.03  5000001     0.00     0.00  $\cbox{green!25}{camlCamlinternalFormat\char`_\char`_fun\char`_84305}$
+  3.77      0.31     0.02 10000003     0.00     0.00  $\cbox{green!25}{camlCamlinternalFormat\char`_\char`_make\char`_printf\char`_62490}$
+  3.77      0.33     0.02 10000002     0.00     0.00  $\cbox{green!25}{camlPrintf\char`_\char`_fun\char`_1347}$
+  3.77      0.35     0.02  5000001     0.00     0.00  $\cbox{green!25}{caml\char`_format\char`_int}$
+  3.77      0.37     0.02  5000001     0.00     0.00  $\cbox{green!25}{parse\char`_format}$
+  2.83      0.39     0.02 20000004     0.00     0.00  $\cbox{green!25}{camlTest\char`_std\char`_\char`_fun\char`_1501}$
+  1.89      0.40     0.01 15000003     0.00     0.00  $\cbox{yellow!25}{caml\char`_apply2}$
+  1.89      0.41     0.01 10000002     0.00     0.00  $\cbox{green!25}{camlTest\char`_std\char`_\char`_fun\char`_1631}$
+  1.89      0.42     0.01 10000002     0.00     0.00  $\cbox{green!25}{camlTest\char`_std\char`_\char`_fun\char`_1635}$
+  1.89      0.43     0.01  5000611     0.00     0.00  $\cbox{red!25}{caml\char`_putblock}$
+  1.89      0.44     0.01  5000002     0.00     0.00  $\cbox{green!25}{camlPrintf\char`_\char`_fprintf\char`_1294}$
+  1.89      0.45     0.01  5000002     0.00     0.00  $\cbox{green!25}{camlPrintf\char`_\char`_kfprintf\char`_1255}$
+  1.89      0.46     0.01  5000001     0.00     0.00  $\cbox{red!25}{caml\char`_alloc\char`_sprintf}$
+  1.89      0.47     0.01  5000001     0.00     0.00  $\cbox{green!25}{caml\char`_ml\char`_output\char`_char}$
+  1.89      0.48     0.01  5000001     0.00     0.00  $\cbox{green!25}{caml\char`_string\char`_length}$
+  1.89      0.49     0.01    11067     0.00     0.00  $\cbox{blue!25}{caml\char`_oldify\char`_one}$
+  1.89      0.50     0.01     2060     0.00     0.01  $\cbox{blue!25}{caml\char`_oldify\char`_local\char`_roots}$
+...
+\end{lstlisting}
+\begin{lstlisting}[basicstyle=\linespread{0.8}\ttfamily\footnotesize,
+basewidth={.4em,.2em}, frame=single]
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ns/call  ns/call  name    
+ 13.17      0.32     0.32                             $\cbox{blue!25}{GC\char`_build\char`_fl}$
+ 12.96      0.64     0.32 20000004    15.75    15.75  $\cbox{yellow!25}{closure\char`_promote\char`_1636}$
+ 12.76      0.95     0.31                             $\cbox{red!25}{GC\char`_malloc\char`_kind}$
+ 10.29      1.20     0.25                             $\cbox{blue!25}{GC\char`_mark\char`_from}$
+  9.47      1.43     0.23                             $\cbox{blue!25}{GC\char`_apply\char`_to\char`_all\char`_blocks}$
+  6.38      1.58     0.16                             $\cbox{red!25}{GC\char`_allochblk\char`_nth}$
+  4.94      1.70     0.12                             $\cbox{yellow!25}{closure\char`_promote\char`_2347}$
+  3.70      1.79     0.09                             $\cbox{blue!25}{GC\char`_clear\char`_stack\char`_inner}$
+  2.26      1.85     0.06                             $\cbox{red!25}{GC\char`_malloc}$
+  1.65      1.89     0.04 20000004     2.00     5.00  $\cbox{yellow!25}{closure\char`_promote\char`_1504}$
+  1.65      1.93     0.04                             $\cbox{blue!25}{GC\char`_clear\char`_hdr\char`_marks}$
+  1.23      1.96     0.03                             $\cbox{blue!25}{GC\char`_finish\char`_collection}$
+  1.23      1.99     0.03                             $\cbox{green!25}{func\char`_2301}$
+  1.03      2.01     0.03 20000004     1.25     6.25  $\cbox{yellow!25}{closure\char`_2\char`_1588}$
+  0.82      2.03     0.02 10000002     2.00     2.00  $\cbox{green!25}{local\char`_func\char`_2208}$
+  0.82      2.05     0.02                             $\cbox{red!25}{GC\char`_allochblk}$
+  0.82      2.07     0.02                             $\cbox{red!25}{GC\char`_generic\char`_malloc}$
+  0.82      2.09     0.02                             $\cbox{red!25}{GC\char`_generic\char`_malloc\char`_inner}$
+  0.82      2.11     0.02                             $\cbox{blue!25}{GC\char`_install\char`_header}$
+  0.82      2.13     0.02                             $\cbox{blue!25}{GC\char`_push\char`_next\char`_marked\char`_uncollectable}$
+  0.82      2.15     0.02                             $\cbox{blue!25}{GC\char`_reclaim\char`_clear}$
+  0.82      2.17     0.02                             get_index
+  0.62      2.19     0.02 10000002     1.50     1.50  $\cbox{green!25}{local\char`_func\char`_2144}$
+  0.62      2.20     0.02 10000002     1.50     1.50  $\cbox{green!25}{local\char`_func\char`_2240}$
+  0.62      2.22     0.02                             $\cbox{blue!25}{GC\char`_free\char`_block\char`_ending\char`_at}$
+  0.41      2.23     0.01 20000004     0.50     6.75  $\cbox{yellow!25}{closure\char`_promote\char`_1542}$
+  0.41      2.24     0.01 10000002     1.00     1.00  $\cbox{green!25}{local\char`_func\char`_2176}$
+  0.41      2.25     0.01                             $\cbox{blue!25}{GC\char`_add\char`_to\char`_black\char`_list\char`_stack}$
+  0.41      2.26     0.01                             $\cbox{blue!25}{GC\char`_clear\char`_fl\char`_links}$
+  0.41      2.27     0.01                             $\cbox{blue!25}{GC\char`_clear\char`_fl\char`_marks}$
+  0.41      2.28     0.01                             $\cbox{blue!25}{GC\char`_clear\char`_stack}$
+  0.41      2.29     0.01                             $\cbox{blue!25}{GC\char`_continue\char`_reclaim}$
+  0.41      2.30     0.01                             $\cbox{blue!25}{GC\char`_find\char`_header}$
+...
+\end{lstlisting}

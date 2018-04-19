@@ -1,0 +1,32 @@
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize,
+basewidth={.5em,.3em}, frame=single]
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+100.00      0.93     0.93        1   930.03   930.03  $\cbox{green!25}{camlTest\char`_\char`_entry}$
+  0.00      0.93     0.00  1125001     0.00     0.00  $\cbox{green!25}{caml\char`_ml\char`_output\char`_char}$
+  0.00      0.93     0.00  1125000     0.00     0.00  $\cbox{green!25}{camlTest\char`_\char`_print\char`_byte\char`_1232}$
+  0.00      0.93     0.00     1489     0.00     0.00  caml_page_table_modify
+  0.00      0.93     0.00       28     0.00     0.00  caml_stat_alloc
+...
+\end{lstlisting}
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize,
+basewidth={.5em,.3em}, frame=single]
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 44.37      7.00     7.00                             $\cbox{green!25}{main}$
+ 10.65      8.68     1.68 676990954     0.00     0.00  $\cbox{red!25}{BOX\char`_GEN}$
+  8.71     10.06     1.38                             $\cbox{red!25}{GC\char`_malloc\char`_kind}$
+  8.24     11.36     1.30                             $\cbox{blue!25}{GC\char`_build\char`_fl}$
+  7.16     12.49     1.13                             $\cbox{blue!25}{GC\char`_apply\char`_to\char`_all\char`_blocks}$
+  3.55     13.05     0.56                             $\cbox{blue!25}{GC\char`_mark\char`_from}$
+  2.66     13.47     0.42                             $\cbox{red!25}{GC\char`_allochblk\char`_nth}$
+  2.28     13.83     0.36                             $\cbox{blue!25}{GC\char`_clear\char`_stack\char`_inner}$
+  1.77     14.11     0.28                             frame_dummy
+  1.71     14.38     0.27                             $\cbox{blue!25}{GC\char`_reclaim\char`_clear}$
+  1.05     14.54     0.17                             $\cbox{red!25}{GC\char`_malloc}$
+  0.76     14.66     0.12                             $\cbox{blue!25}{GC\char`_find\char`_header}$
+  0.63     14.76     0.10                             $\cbox{blue!25}{GC\char`_clear\char`_hdr\char`_marks}$
+  0.63     14.86     0.10                             $\cbox{blue!25}{GC\char`_finish\char`_collection}$
+  0.48     14.94     0.08                             $\cbox{red!25}{GC\char`_generic\char`_malloc\char`_inner}$
+...
+\end{lstlisting}

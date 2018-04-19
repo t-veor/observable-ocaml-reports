@@ -1,0 +1,26 @@
+\begin{tikzpicture}[
+blank/.style={node distance=1.5cm},
+block/.style={rectangle, text centered, rounded corners, minimum height=0.8cm, 
+node distance=1.5cm, thick, draw=blue!50, fill=blue!20},
+block-emph/.style={block, draw=red!50, fill=red!20},
+block-neutral/.style={block, draw=black!50, fill=black!20},
+line/.style={draw, -latex'}
+]
+\node [blank] (start) {};
+\node [block, below of=start] (parsing) {Parsing};
+\node [block, below of=parsing] (typing) {Typing};
+\node [block, below of=typing] (translate) {Translate};
+\node [block, below of=translate, xshift=2.25cm] (bytegen) {Bytegen};
+\node [blank, below of=bytegen] (compiled-byte) {OCaml bytecode};
+\node [block, below of=translate, xshift=-2.25cm] (asmgen) {Asmgen};
+\node [blank, below of=asmgen] (compiled-asm) {compiled OCaml binary};
+
+\path [line] (start) -- node [midway, label=right:{OCaml source code}] {}
+(parsing);
+\path [line] (parsing) -- node [label=right:{Parsetree}] {} (typing);
+\path [line] (typing) -- node [label=right:{Typedtree}] {} (translate);
+\path [line] (translate) -- node [label=left:{Lambda}, yshift=0.25cm] {} (asmgen);
+\path [line] (asmgen) -- (compiled-asm);
+\path [line] (translate) -- (bytegen);
+\path [line] (bytegen) -- (compiled-byte);
+\end{tikzpicture}
