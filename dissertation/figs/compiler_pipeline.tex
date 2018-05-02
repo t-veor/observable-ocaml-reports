@@ -1,0 +1,29 @@
+\begin{tikzpicture}[
+blank/.style={node distance=1.5cm},
+block/.style={rectangle, text centered, rounded corners, minimum height=0.8cm, 
+node distance=1.5cm, thick, draw=blue!50, fill=blue!20},
+block-emph/.style={block, draw=red!50, fill=red!20},
+block-neutral/.style={block, draw=black!50, fill=black!20},
+line/.style={draw, -latex'}
+]
+\node[blank] (start) at (0, 0) {};
+\node[blank, right=1.5cm of start] (dummy) {};
+\node[block, below=1.5cm of dummy] (typecollect) {\texttt{Typecollect}};
+\node[block, right=2cm of dummy] (ccompile) {\texttt{Ccompile}};
+\node[block, right=of ccompile] (cprint) {\texttt{Cprint}};
+\node[block-neutral, right=of cprint] (gcc) {GCC};
+\node[block, below=0.5cm of cprint] (runtime-h) {\texttt{runtime.h}};
+\node[block-neutral, below=1.5cm of cprint] (boehm-gc) {Boehm GC};
+\node[blank, right=1cm of gcc] (executable) {
+    \begin{tabular}{c} compiled \\ executable \end{tabular}
+};
+
+\path [line] (start) -- (ccompile) node [midway, above] {\texttt{Lambda} IR};
+\path [line] (dummy.center) -- (typecollect);
+\path [line] (typecollect) -| (ccompile) node [midway, below] {type information};
+\path [line] (ccompile) -- (cprint) node [midway, above] {\texttt{Ccode}};
+\path [line] (cprint) -- (gcc) node [midway, above] {C};
+\path [line] (runtime-h) -| (gcc.240);
+\path [line] (boehm-gc) -| (gcc.300);
+\path [line] (gcc) -- (executable);
+\end{tikzpicture}
