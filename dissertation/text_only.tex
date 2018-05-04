@@ -1,0 +1,43 @@
+\documentclass[12pt,a4paper,twoside,openright, draft]{report}
+\usepackage[pdfborder={0 0 0}, breaklinks]{hyperref}    % turns references into hyperlinks
+\usepackage[margin=25mm]{geometry}  % adjusts page layout
+\usepackage{graphicx}  % allows inclusion of PDF, PNG and JPG images
+\usepackage{docmute}   % only needed to allow inclusion of proposal.tex
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{adjustbox}
+\usepackage{multirow}
+
+% tikz settings
+\usetikzlibrary{shapes, arrows, positioning}
+
+\raggedbottom                           % try to avoid widows and orphans
+\sloppy
+\clubpenalty1000%
+\widowpenalty1000%
+
+\renewcommand{\baselinestretch}{1.1}    % adjust line spacing to make
+                                        % more readable
+
+\definecolor{keywords}{RGB}{220,0,90}
+\definecolor{strings}{RGB}{0,140,0}
+\definecolor{comments}{RGB}{0,127,0}
+\definecolor{identifiers}{RGB}{20,20,75}
+
+\lstset{basicstyle=\ttfamily\small,
+    basewidth={.5em, .3em},
+    keywordstyle=\color{keywords},
+    commentstyle=\color{comments},
+    stringstyle=\color{strings},
+    showstringspaces=false,
+    % identifierstyle=\color{identifiers},
+    escapechar=$ %$
+    }
+
+\newcommand{\cbox}[2]{\adjustbox{bgcolor=#1}{#2}}
+
+\begin{document}
+
+\input{body.tex}
+
+\end{document}

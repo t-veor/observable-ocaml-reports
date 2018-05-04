@@ -1,0 +1,443 @@
+\appendix
+
+\chapter{Addenda}
+
+This appendix chapter provides some more details about finer details about the
+implementation and the evaluation that could not fit within the main body of the
+dissertation.
+
+\section{The \texttt{Ccode} module} \label{ccode}
+
+The \texttt{Ccode} module stores the OCaml representation of the target C
+subset. It is specially chosen to be a subset of C, and only contain the
+necessary types to represent the compilation target. There are four main
+datatypes in the module, and a quick summary of them is given here:
+
+\begin{itemize}
+
+\item \texttt{Ccode.cident}, for representing identifiers (variable names, macro
+    names, function names etc.) in C. This is largely a wrapper over the
+    \texttt{Ident.t} type the OCaml compiler uses to represent identifiers,
+    which is the string name along with a unique integer ID to disambiguate it
+    from other identifiers with the same name.
+
+\item \texttt{Ccode.cexpr}, for representing expressions in C. These include a
+    wrapper around \texttt{cident}s, literals, and operations (such as unary
+    operations, binary operations, function calls etc.) on other
+    \texttt{cexpr}s.
+
+\item \texttt{Ccode.cstatement}, for representing statements in C. Most data
+    constructors in this type take a \texttt{cexpr} or a block of other
+    \texttt{cstatement}s, and include if statements, while statements, switch
+    statements etc. Notably a \texttt{cexpr} can be promoted to a
+    \texttt{cstatement}, but not the other way around.
+
+\item \texttt{Ccode.ctype}, for representing types in C. This is a auxiliary
+    type used by the casting operator in \texttt{cexpr} and the variable
+    declaration statement in \texttt{cstatement}. A more in-depth discussion of
+    the types used to represent OCaml values is at \S\ref{value-repr}.
+
+\end{itemize}
+
+In addition, the \texttt{Ccode} module contains some special record types:
+
+\begin{itemize}
+
+\item \texttt{Ccode.cfunc}, which is a record type holding information about the
+    return type of the function, the names and types of its arguments, its name,
+    its body of code, and its location in the source.
+
+\item \texttt{Ccode.ccode}, which is the record struct that is finally passed
+    into \texttt{Cprint} to print the code. It is composed of three lists: the
+    block of statements that forms the preamble (which is things like
+    \texttt{\#}\texttt{include} directives and global variable declarations),
+    the list of functions, and the block of code representing the \texttt{main}
+    function.
+
+\end{itemize}
+
+\section{Purpose of \texttt{runtime.h}}
+
+\texttt{runtime.h} is a special header file which needs to be included in the
+compilation of the output C file to produce executables from my compiler. It
+contains the type declarations mentioned in the implementation chapter, as well
+as helper functions and macros useful for implementing certain structures and
+observability features.
+
+\section{Compilation of basic constructs} \label{basic-constructs}
+
+This section gives an overview of other common basic syntactical structures
+in OCaml are compiled into C.
+
+\subsection{Variable scoping differences between C and OCaml}
+\label{variable-scoping}
+
+In OCaml, each variable is only visible in the body of the expression where it
+is bound, whether if that's in a let-binding or a function declaration. This is
+in contrast to variable scope in C, where a variable is visible for the entirety
+of the rest of the block it is in.
+
+Furthermore, while OCaml does not allow reassignments (of variables, not 
+references), it does allow you to bind another variable with the same name:
+
+\begin{lstlisting}[language=Caml]
+let x = 1 in
+let x = 2 in
+print_int x
+\end{lstlisting} 
+
+Here the second binding is not reassigning the value of \texttt{x}, rather it's 
+creating another variable with the same name. The first variable still exists, 
+but it's been shadowed by the second variable making it inaccessible. Note that 
+after leaving the body of the second let binding the second variable goes out 
+of scope and the first variable is accessible again.
+
+This behaviour can be approximated using C99's block-scoping:
+
+\begin{lstlisting}[language=C]
+int x = 1;
+{
+    int x = 2;
+    print_int(x);
+}
+\end{lstlisting}
+
+Here we see that within the inner block, the second declaration of \texttt{x}
+has shadowed the first declaration of \texttt{x}, but the original declaration
+of \texttt{x} is still accessible once we leave the inner block (which is also
+the behaviour in OCaml). Therefore, we have to pay careful attention to
+inserting variable scopes to correctly mirror the shadowing effects in
+OCaml\footnote{Note however we cannot apply this process for variable
+    declarations at the top-level, since you cannot insert block-scopes at the
+    top level in C. Unfortunately this requires top-level variables to be
+renamed.}.
+
+\subsection{Meta-notation for compilation} \label{meta-notation}
+
+To describe the compilation process from OCaml expressions into C we use a
+C-like meta-notation. Recall from \S\ref{expr-stmt}, each OCaml expression
+compiles to a set of C statements and a variable, which the C statements will
+have assigned the correct value to after their execution. We therefore denote
+the set of C statements an expression \textit{\texttt{e}} compiles into as
+\texttt{comp<\textit{e}>}, and the variable it is associated with with
+\texttt{var<\textit{e}>}. This gives a way of recursively defining the
+compilation process by defining \texttt{comp<\textit{e}>} for all possible OCaml
+expressions. In the actual compiler, the \texttt{comp<>} functions are
+implemented within the \texttt{Ccompile} module, which outputs an equivalent
+representation of C using the types in the \texttt{Ccode} module.
+
+As an example, consider the OCaml expression \texttt{\textit{e1} + \textit{e2}}.
+We therefore define:
+
+\begin{lstlisting}
+comp<$\textit{e1}$ + $\textit{e2}$> :=
+
+declare$\footnotemark$ result;
+comp<$\textit{e1}$>; // var<$\textit{e1}$> now contains the correct value
+comp<$\textit{e2}$>; // var<$\textit{e2}$> now contains the correct value
+result = var<$\textit{e1}$> + var<$\textit{e2}$>;
+\end{lstlisting}
+\footnotetext{\texttt{declare} here stands for the type of the result of the
+expression which is required for variable declarations in C. In general, this
+type is not known generally and depends on the specific types of the
+subexpressions, so we use \texttt{declare} to stand in for this.}
+
+\texttt{result} refers to some temporary variable name which we assign to this
+expression, and we define \texttt{var<\textit{e1} + \textit{e2}> := result}.
+Note that this is a common pattern so we will implicitly assume that when
+defining the compilation of an expression \texttt{\textit{e}},
+\texttt{var<\textit{e}>} will be the variable named \texttt{result} within
+\texttt{comp<\textit{e}>}.
+
+\subsection{\texttt{if-then-else} expressions}
+
+OCaml does not have if-statements but if-expressions, which are of the form:
+
+\begin{center}
+    \texttt{if \emph{cond} then \emph{A} else \emph{B}}
+\end{center}
+
+Using the same notational conventions as in \S\ref{meta-notation}:
+
+\begin{lstlisting}
+comp<if $\emph{cond}$ then $\emph{A}$ else $\emph{B}$> :=
+
+declare result;
+
+comp<$\emph{cond}$>;
+if (var<$\emph{cond}$>) {
+    comp<$\emph{A}$>;
+    result = var<$\emph{A}$>;
+} else {
+    comp<$\emph{B}$>;
+    result = var<$\emph{B}$>;
+}
+\end{lstlisting}
+
+The same trick to propagate results outwards from inner scopes has been 
+employed here also.
+
+\subsection{\texttt{while} loops}
+
+While loops are fairly simple in OCaml -- they simply repeatedly evaluate their 
+body while the condition evaluates to true. There are no break nor continue 
+statements, so there is not a concept of breaking out of a loop early with the 
+exception of setting the condition to false. They have the syntax:
+
+\begin{center}
+    \texttt{while \emph{cond} do \emph{body} done}
+\end{center}
+
+In addition, the overall return value of the loop is \texttt{unit}. The
+compilation for them is therefore: 
+
+\begin{lstlisting}
+comp<while $\emph{cond}$ do $\emph{body}$ done> :=
+
+comp<$\emph{cond}$>;
+declare temp = var<$\emph{cond}$>;
+while (temp) {
+    comp<$\emph{body}$>;
+    comp<$\emph{cond}$>;
+}
+
+declare result = make_unit();
+\end{lstlisting}
+
+There is one interesting thing of note here: \texttt{\emph{cond}} does need to 
+be evaluated twice, once before the loop, and once at the end of the loop. This 
+is because the OCaml while loop re-evaluates \texttt{\emph{cond}} at the 
+beginning of each iteration, but since OCaml expressions turn into a list of 
+statements in C, we cannot fit this re-evaluation into the head of the while 
+statement -- instead, a simple and equivalent way around this is to simply 
+re-evaluate \texttt{\emph{cond}} at the end of the loop.
+
+\subsection{\texttt{for} loops}
+
+For loops in OCaml are extremely limited. They permit only iteration over a 
+fixed range of integers, and also only allow increments in steps of 1. Like 
+with while loops, there are no break nor continue statements in OCaml and so 
+there is no possibility of exiting a loop early. They have two forms, which are:
+
+\begin{center}
+\texttt{for \emph{x} = \emph{start} to \emph{end} do \emph{body} done}\\
+\texttt{for \emph{x} = \emph{start} downto \emph{end} do \emph{body} done}\\
+\end{center}
+
+These two versions simply iterate up to or down to a certain number 
+(inclusive). Since for loops are so incredibly limited, it was decided 
+that rather than including for loops in the targeted subset of C, it would be 
+easier to also compile these into while loops in C.
+
+\begin{lstlisting}
+comp<for $\emph{x}$ = $\emph{start}$ to $\emph{end}$ do $\emph{body}$ done> :=
+
+comp<$\emph{start}$>;
+comp<$\emph{end}$>;
+int temp1 = var<$\emph{start}$>;
+int temp2 = var<$\emph{end}$>;
+
+{
+    decl x = temp1;
+    while (x <= temp2) {
+        comp<$\emph{body}$>;
+        x++;
+    }
+}
+
+decl result = make_unit();
+\end{lstlisting}
+
+(Replace \texttt{<=} for \texttt{>=} and \texttt{x++} for \texttt{x--} for 
+\texttt{downto}.)
+
+There are a few things about this compilation that warrant elaboration:
+\begin{itemize}
+
+\item \texttt{\emph{x}} again needs to be declared in its own scope, as the for
+    loop acts as another variable binding site. Thus, the entirety of the for
+    loop is wrapped in another block.
+
+\item Note the use of \texttt{temp1} and \texttt{temp2}, which are necessary
+    because \texttt{var<\emph{start}>} and \texttt{var<\emph{end}>} may collide
+    with the name of the variable \texttt{x} and cause it to be shadowed in the
+    inner scope.
+
+\item \texttt{\emph{start}} and \texttt{\emph{end}} are only evaluated once at
+    the start of the loop -- after some quick experiments it could be shown that
+    OCaml does this as well, i.e. the limits of the iteration range do not
+    change while the loop is running.
+
+\item \texttt{\emph{x}} is mutated through the iteration of the loop. This is
+    fine, as OCaml for loops only operate on integers, which are copied instead
+    of referenced by other constructs in the target subset of C; thus the
+    mutation of \texttt{\emph{x}} cannot affect the behaviour of the program.
+
+\end{itemize}
+
+\section{\texttt{Lstaticraise} and \texttt{Lstaticcatch}}
+
+The \texttt{Lambda} IR also has support for static exceptions, which are
+exceptions that can only occur across a local scope\footnote{In contrast to
+normal exceptions, which unwind the stack and can jump to an error handler in an
+enclosing scope.}. This is similar to the behaviour of a \texttt{goto} statement
+in C. In particular, the OCaml pattern-match compiler may opt to use a static
+exception to avoid duplication of code for certain branches. For example,
+consider this match expression:
+
+\begin{lstlisting}[language=Caml]
+type color =
+  | Red
+  | Green
+  | Blue
+  | Gray of int
+  | RGB of int * int * int
+
+match c with
+  | Red -> 0
+  | Green -> 1
+  | Gray x -> 2
+  | _ -> 3
+\end{lstlisting}
+
+This match expression contains a wildcard expression which matches both 
+\texttt{Blue}, which is an integer, and \texttt{RGB}, which is a block. The 
+OCaml pattern-match compiler thus compiles it into the following 
+\texttt{Lambda} expression:
+
+\begin{lstlisting}
+(catch
+  (switch* c/xxxx
+    case int 0: 0
+    case int 1: 1
+    case int 2: (exit 1)
+    case tag 0: 2
+    case tag 1: (exit 1))
+  with (1) 3)
+\end{lstlisting}
+
+The branches for \texttt{Blue} and \texttt{RGB} have been compiled into a static
+exception (the \texttt{exit} expression), to avoid duplicating the expression in
+the branch. This behaviour can be emulated with \texttt{goto}s in C.
+\texttt{Lstaticcatch} expressions can be compiled simply into an \texttt{if(0)}
+and a label, and \texttt{Lstaticraise} expressions are simply compiled into a
+\texttt{goto}.
+
+\section{Functions that return other functions} \label{incomplete-funcs}
+
+\S\ref{function-typing} provides a scheme for converting between function types
+in OCaml to function types in C, but this conversion doesn't always make sense.
+In OCaml, it is possible and often useful to define functions that return other
+functions. As a simple example, consider the function:
+
+\begin{lstlisting}[language=Caml]
+let f x = (fun y -> x + y)
+\end{lstlisting}
+
+The type of \texttt{f} is \texttt{int -> int -> int}, but it's obvious that this
+isn't translatable into a C function \texttt{int f(int x, int y)} -- the body of
+the function would return a closure, and not an integer.
+
+Since the type of \texttt{f} is known, this is a rather simple problem to fix
+via a technique known as eta-expansion, and can be done at the source code
+level. Simply add extra parameters to match the number of parameters in the
+type, and apply them to the old result of the function.
+
+\begin{lstlisting}[language=Caml]
+let f x y = (fun y -> x + y) y
+\end{lstlisting}
+
+\section{``Reduced allocations'' mode} \label{reduced-allocs}
+
+In the evaluation we mention that since floating point numbers must be boxed to
+be stored in OCaml blocks or polymorphic structures, this makes operations with
+them incredibly slow.  It however is still necessary for observability, as
+non-integral or pointer types must be tagged with their type within polymorphic
+structures so that a debugger is able to infer their types. If we relax this
+requirement however, since the OCaml runtime does not otherwise require data to
+be tagged with their type, we can store floating point numbers (and other types,
+such as closures and strings) directly within OCaml blocks without needing to
+make a separate object on the heap.
+
+\begin{figure}
+    \centering
+    \resizebox{\textwidth}{!}{
+        \includegraphics{figs/benchmarks-no-alloc.pdf}
+    }
+
+    \caption{Relative speed-up as before in figure~\ref{fig:raw-benchmarks}.
+    While most of the benchmarks do not change much, note that the speed-up
+    times for \texttt{mandelbrot} and \texttt{nbody} increase signficantly to
+    more closely match the native compiler.}
+
+    \label{fig:benchmarks-no-alloc}
+\end{figure}
+
+I implemented this mode which is accessible via a C compiler flag, and obtained
+results which demonstrated far more favourable execution times especially for
+the \texttt{mandelbrot} and \texttt{nbody} benchmarks, as can be seen in
+figure~\ref{fig:benchmarks-no-alloc}.
+
+While this change does increase the performance of the compiler, it is worth
+noting that this means that polymorphic structures are no longer observable as a
+debugger cannot determine all the types at runtime, as well as meaning that
+functions that require some degree of runtime reflection such as OCaml's
+polymorphic comparisons do not function. This means that while the results
+provided by this mode are interesting and represent the performance of the
+compiler under perhaps a better representation of polymorphic data, the results
+represent an interesting side scenario that is not suitable for use generally.
+
+\section{Stack overflow} \label{stack-overflow}
+
+Curiously, from the benchmark results in figure~\ref{fig:raw-benchmarks}, the
+executable produced by GCC under all optimisation levels segfaults for the
+benchmark \texttt{sieve}. This is in spite of \texttt{sieve} being written in
+tail-recursive style, and \texttt{clang} being able to produce a working
+executable.
+
+I therefore performed an investigation using M. Godbolt's compiler
+explorer\footnote{\url{https://godbolt.org/}}, and narrowed down the offending
+code that causes this to the following: 
+
+\begin{lstlisting}[language=C]
+typedef union {
+    void* ptr;
+} val;
+
+void* g(val);
+
+val f(val x) {
+    return {.ptr = g(x)};
+}
+\end{lstlisting}
+
+When compiled with gcc, this produces the rather confusing output:
+
+\input{figs/stack_overflow.tex}
+
+Somehow, the cast back into the union type prevents \texttt{gcc} from detecting 
+the function call is in tail-call position in this specific case, despite the 
+fact that the binary representations for the pointer and the union can be the
+same and so no conversion would be required in assembler. This causes the
+function to compile to a decrement of the stack pointer, a call to another
+function, and then an immediate increment of the stack pointer again, when it
+would've been equivalent to a \texttt{jmp} instruction to \texttt{g}.
+
+
+\chapter{Debug sessions} \label{debug-sessions}
+
+\section{The ``sum'' program}
+
+\input{appendices/sum_prog.tex}
+
+\section{GDB session of the ``sum'' program} \label{debug-gdb}
+
+\input{appendices/gdb_listing.tex}
+
+\section{Ocamldebug session of the ``sum'' program} \label{debug-ocaml}
+
+\input{appendices/ocamldebug_listing.tex}
+
+\chapter{Project Proposal}
+
+\input{../proposal/body}
