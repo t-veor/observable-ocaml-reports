@@ -73,14 +73,14 @@ code. We can exploit this to obtain very fast executables without needing to
 perform much optimisation on the OCaml code. There will however be performance 
 trade-offs in terms of emulating OCaml function calls in C compared to normal 
 function calls, as OCaml functions can take advantage of features such as
-lexical closure and partial application, as well as being first-class allowing
+lexical closures and partial application, as well as being first-class allowing
 them to be passed as values to higher-order functions.
 
 \section{Previous Work}
 
 There exist prior work for compiling ML-like languages into C
 \cite{noassemblyrequired} but the approach used is to transform the program into
-continuation-passing style, which is not suitable for the compiler as it would
+continuation-passing style. This is not suitable for the compiler as it would
 interfere with the program execution and make it untenable to map OCaml source
 code into regions of the compiled code for debugging purposes, but shows that
 compilation into C from similar functional languages is feasible.
@@ -96,12 +96,12 @@ such as data representation and closure conversion.
 
 \chapter{Preparation}
 
-Before starting the project I have had significant experience with functional
+Before starting the project I had significant experience with functional
 languages through the Standard ML course undertaken and also personal experience
-with programming in Haskell, but however I had never used OCaml at length, nor
-worked with the OCaml compiler codebase. While OCaml was very simple to learn
-from my previous experiences with functional languages, the OCaml compiler
-codebase much to my chagrin was large, complex, and very sparsely commented.
+with programming in Haskell, but I had never used OCaml at length, nor worked
+with the OCaml compiler codebase. While OCaml was very simple to learn from my
+previous experiences with functional languages, the OCaml compiler codebase was
+large, complex, and very sparsely commented.
 
 In this respect, a large portion of time during the starting weeks of the 
 project was focused on reading through barely-commented source code in order to
@@ -161,12 +161,12 @@ representation would be:
     representation for which this has already happened.
 
 \item The representation must also allow some amount of reconstruction back to
-    the source level, as this is important so we can map the output code to the
-    correct sections of the source code, which is important for observability
-    and debugging as we would like debuggers to display the correct segments of
-    code being debugged. This does present an antagonism, where we would like
-    the IR to be both normalised, but not enough that we cannot recover any
-    source-level information from it.
+    the source level, so we can map the output code to the correct sections of
+    the source code. This is important for observability and debugging as we
+    would like debuggers to display the correct segments of code being debugged.
+    This does however present an antagonism, where we would like the IR to be
+    both normalised, but not enough that we cannot recover any source-level
+    information from it.
 
 \end{itemize}
 
@@ -236,7 +236,7 @@ However, there are some major disadvantages of the \texttt{Lambda} IR:
     solved somewhat with the existence of \texttt{Lambda} events, which will be
     discussed in \S\ref{lambda-types}.
 
-\item Normalisation in the \texttt{Lambda} IR discard a lot of source-level
+\item Normalisation in the \texttt{Lambda} IR discards a lot of source-level
     information such as which source-level expressions \texttt{Lambda}
     expressions map to, as well as having very little information about the
     location in the source code of the current code. This is somewhat remedied
@@ -385,8 +385,8 @@ master branch.
 
 In addition, a copy of the source code was continuously backed up using Dropbox,
 which was synced between two local copies of the code, on two separate machines.
-In this way, the code had four points of redundancy in the case of any computer
-failures.
+In this manner, the code had four points of redundancy in the case of any
+computer failures.
 
 \section{Licensing of external code}
 
@@ -587,7 +587,7 @@ executing machine code with the relevant line from the source.
 
 C compilers support controlling the line and source file of your code with use
 of the \texttt{\#}\texttt{line} directive. This means the compiler can put all
-statements associated with one line of source on the same line\footnote{the line
+statements associated with one line of source on the same line\footnote{The line
     number changes whenever there is a new line, even after being specified with
 \texttt{\#}\texttt{line}.}, interspersed with a \verb|#line| directive whenever
 the source code line actually changes.
@@ -689,8 +689,6 @@ occur only within a function, or a data constructor. This means that to preserve
 the semantics in C, the compiler therefore compiles \texttt{let rec} in two
 phases:
 
-The compiler thus splits compilation of \texttt{let rec} into two phases:
-
 \begin{itemize} 
     
 \item Variables are declared. If the associated expression has no free variables
@@ -775,9 +773,9 @@ have any parameters and variants that do can be of the same type.
 
 \subsubsection{Tagged pointers}
 
-OCaml blocks must be allocated on the heap since they are of variable size, so
-have to be referenced using a pointer. This means that we need a type than can
-either be a pointer or an integer, which is what tagged pointers provide.
+OCaml blocks must be allocated on the heap since they are of variable size, and
+so have to be referenced using a pointer. This means that we need a type than
+can either be a pointer or an integer, which is what tagged pointers provide.
 
 Tagged pointers are just a union type between pointers and integers. On most
 architectures, pointers are word-aligned, meaning that the lower bits of a
@@ -869,6 +867,11 @@ typedef union {
     value_type value;
 } any_type;
 \end{lstlisting}
+
+We refer the act of casting one of these types to an \verb|any_type| as
+``packing'', or ``unpacking'' for the opposite direction. Note that since this
+is a union type, the ``pack'' operations don't represent any actual operations
+in machine code.
 
 \texttt{block} therefore declares a \verb|any_type| array to support both
 storing \verb|value_type|s as well as special blocks that store \verb|double|s
@@ -1254,7 +1257,7 @@ functions to an OCaml block (because the data structure may be passed to a
 function polymorphic in a subtype of the data structure), or accessing functions
 from an OCaml block\footnote{It's not safe to simply remove the head from the
     closure chain to undo this cast, as there's no guarantee the last
-    transformation applied to a closure will the cast -- the closure may have
+transformation applied to a closure will be the cast -- the closure may have
 been partially applied or cast again to something else.}, or storing and
 retrieving functions from closure data.
 
@@ -1463,7 +1466,7 @@ Notable results from the benchmark include:
 
 \begin{itemize}
 
-\item The drop-in garbage collection is unsurprisingly much slower than the
+\item The drop-in Boehm garbage collector is unsurprisingly much slower than the
     OCaml GC, as it is a conservative GC and does not have any domain-specific
     knowledge. This can be best seen in the \texttt{binary-trees} benchmark.
 
@@ -1474,7 +1477,8 @@ Notable results from the benchmark include:
 
 \item Strangely, the C compilers perform exceptionally badly in benchmarks
     involving floating point manipulations, as can be seen in
-    \texttt{mandelbrot} and \texttt{nbody} benchmarks.
+    \texttt{mandelbrot} and \texttt{nbody} benchmarks. This is investigated in
+    \S\ref{float-alloc}.
 
 \item Benchmarks which involve lots of closure creation and application are also
     slower relative to the OCaml native compiler, as can bee seen in the
@@ -1516,15 +1520,16 @@ having been written in imperative-style code.
 \begin{figure}
     \centering
     \input{figs/mandelbrot_gprof.tex}
-    \caption{Truncated Gprof outputs for the OCaml native executable and the C 
-    executable, which has been highlighted with the roles of each function. 
-    Functions highlighted green are logical functions for the execution of the 
-    program, functions highlighted red are to do with allocating blocks on the 
-    heap, and functions highlighted blue are functions used by the garbage 
-    collector.
-    Note that compiling with profiling information inserts extra instructions 
-    and function calls for instrumentation purposes so the times shown are not 
-    indicative of how fast the benchmarks execute otherwise.}
+    \caption{Truncated Gprof outputs for the OCaml native executable and the C
+        executable for the \texttt{mandelbrot} benchmark, which has been
+        highlighted with the roles of each function.  Functions highlighted
+        green are logical functions for the execution of the program, functions
+        highlighted red are to do with allocating blocks on the heap, and
+        functions highlighted blue are functions used by the garbage collector.
+        Note that compiling with profiling information inserts extra
+        instructions and function calls for instrumentation purposes so the
+        times shown are not indicative of how fast the benchmarks execute
+        otherwise.}
     \label{fig:mandelbrot-gprof}
 \end{figure}
 
@@ -1599,9 +1604,9 @@ but a small amount of overhead from needing to load in an address.
 
 \subsubsection{Closure creation}
 
-For a lot of benchmarks the C compilers perform far worse than the OCaml native 
-compiler which is likely to be due to the fact that the closure operations in C 
-are far slower than the OCaml native compiler can compile them.
+For a lot of benchmarks the C compilers perform far worse than the OCaml native
+compiler which is likely to be due to the fact that the closure operations in
+the generated C are far slower than the OCaml native compiler can compile them.
 
 To confirm this, I collecting profiling information from the \texttt{lens}
 benchmark, which is the most heavy benchmark in terms of closure creation and
@@ -1644,8 +1649,7 @@ closure representations.
         \input{figs/benchmark_table.tex}
     }
     \caption{Summary table of benchmark results. All figures given in 
-    seconds. (Reduced allocations times are a result of
-    \S\ref{reduced-allocs}.)}
+    seconds. (The final two columns are a result of \S\ref{reduced-allocs}.)}
 \end{figure}
 
 \section{Observability} \label{observability}
@@ -1654,9 +1658,9 @@ The other way to evaluate the the compiler is to determine the observability of
 the compiled output, or how much information we are able to recover about the 
 internal state of the program as it is executing.
 
-The OCaml native code compiler can be said to be not observable at all, since 
-the native executables do not support debugging. Instead, comparisons will be 
-made with the OCaml bytecode debugger.
+The OCaml native code compiler can be said to be not observable at all, since
+the native executables do not support source-level debugging. Instead,
+comparisons will be made with the OCaml bytecode debugger.
 
 \subsection{Sample GDB session}
 
@@ -1710,7 +1714,7 @@ The \texttt{debug/pprint.py} script is a script written to enable printing of
 OCaml values within GDB, as otherwise many values will only be displayed as 
 pointers otherwise.
 
-This is a point where my implementation performs better than 
+This is a point where my implementation offers better functionality than 
 \texttt{ocamldebug}. Because of the representation strategy described in section
 \ref{value-repr}, we can determine the types of values at runtime even if the 
 code we're debugging does not know the types themselves.
@@ -1739,18 +1743,18 @@ acceptably good for debugging, there are certain cases which it does fall down,
 due to a fundamental difference in the way GDB and \texttt{ocamldebug} treats 
 points where the debugger may pause execution.
 
+This is especially confusing sometimes for local anonymous functions. For
+example, in the \texttt{sum} example from earlier, stepping inside the
+\texttt{(f acc x)} expression on line 5 steps you back to the line 8
+(\texttt{let sum = foldl (+) 0}), because we are stepping inside the implicitly
+defined \texttt{(+)} function, which was defined on line 8.
+
 \texttt{ocamldebug} notably only pauses at \texttt{Lambda} events, which are
 described in \S\ref{levents}, but GDB only pauses on lines of code. Since
 \texttt{Lambda} events are inserted directly before or after certain
 expressions, \texttt{ocamldebug} is able to pinpoint exactly where in the
 evaluation of the code it has stopped, but GDB is unable to do this, only
 printing the line of code where it stops at.
-
-This is especially confusing for sometimes for local anonymous functions. For 
-example, in the \texttt{sum} example from earlier, stepping inside the 
-\texttt{(f acc x)} expression on line 5 steps you back to the line 8 
-(\texttt{let sum = foldl (+) 0}), because we are stepping inside the implicitly 
-defined \texttt{(+)} function, which was defined on line 8.
 
 \section{Summary and discussion}
 
@@ -1788,10 +1792,10 @@ compiling the target subset of OCaml correctly into C, as well as providing
 facilities under which the resulting C code could be ``observed'' by a debugger 
 as if it was OCaml code.
 
-Translations of technically challenging features of the languages such as data 
-representation and closure represented were attempted, and largely successful. 
-My implementation also leaves room for further additions to the compiler to add 
-support for the remaining features of OCaml which were not included in the 
+Translations of technically challenging features of the language such as data
+representation and closure represented were attempted, and largely successful.
+My implementation also leaves room for further additions to the compiler to add
+support for the remaining features of OCaml which were not included in the
 target subset if more time was to be dedicated.
 
 We can see that the motivations of the project have been largely fulfilled,
@@ -1825,22 +1829,29 @@ things that I would've done differently had I started the project again. These
 include:
 
 \begin{itemize}
-    \item Support for OCaml's module system, allowing multi-file programs to be 
-    compiled correctly. Currently the compiler is only capable of compiling one 
-    file at a time, but it should not be difficult extend this support;
-    \item Support for more of OCaml's standard library, allowing standard 
-    library modules to be compiled and used;
-    \item Support for a larger subset of OCaml's core language, including array 
-    types and a better support for floating point values, in order to make them 
-    more performant;
-    \item A key assumption of the code is that all primitive types needed are 8 
-    bytes long, or word-sized on a 64-bit system. It would be nice if less 
-    reliance was depended on this so the compiler was more portable to other 
-    systems than 64-bit Linux;
-    \item More performant closures, such as generating function stubs at 
-    runtime to implement closure operations, or using a closure implementation 
-    from a popular library such as \texttt{libffi};
-    \item More time spent with libraries, such as my supervisor's 
-    \texttt{liballocs}, in order to make it possible to have runtime reflection 
-    without resorting to less performant means of storing values.
+
+    \item Support for OCaml's module system, allowing multi-file programs to be
+        compiled correctly. Currently the compiler is only capable of compiling
+        one file at a time, but it should not be difficult extend this support;
+
+    \item Support for more of OCaml's standard library, allowing standard
+        library modules to be compiled and used;
+
+    \item Support for a larger subset of OCaml's core language, including array
+        types and a better support for floating point values, in order to make
+        them more performant;
+
+    \item A key assumption of the code is that all primitive types needed are 8
+        bytes long, or word-sized on a 64-bit system. It would be nice if less
+        reliance was depended on this so the compiler was more portable to other
+        systems than 64-bit Linux;
+
+    \item More performant closures, such as generating function stubs at runtime
+        to implement closure operations, or using a closure implementation from
+        a popular library such as \texttt{libffi};
+
+    \item More time spent with run-time support libraries, such as my
+        supervisor's \texttt{liballocs}, in order to make it possible to have
+        runtime reflection.
+
 \end{itemize}
