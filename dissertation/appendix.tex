@@ -6,7 +6,7 @@ This appendix chapter provides some more details about finer details about the
 implementation and the evaluation that could not fit within the main body of the
 dissertation.
 
-\section{The \texttt{Ccode} module} \label{ccode}
+\section{The \texttt{Ccode} module}\label{ccode}
 
 The \texttt{Ccode} module stores the OCaml representation of the target C
 subset. It is specially chosen to be a subset of C, and only contain the
@@ -32,7 +32,7 @@ datatypes in the module, and a quick summary of them is given here:
     statements etc. Notably a \texttt{cexpr} can be promoted to a
     \texttt{cstatement}, but not the other way around.
 
-\item \texttt{Ccode.ctype}, for representing types in C. This is a auxiliary
+\item \texttt{Ccode.ctype}, for representing types in C. This is an auxiliary
     type used by the casting operator in \texttt{cexpr} and the variable
     declaration statement in \texttt{cstatement}. A more in-depth discussion of
     the types used to represent OCaml values is at \S\ref{value-repr}.
@@ -64,13 +64,12 @@ contains the type declarations mentioned in the implementation chapter, as well
 as helper functions and macros used for implementing certain structures and
 observability features.
 
-\section{Compilation of basic constructs} \label{basic-constructs}
+\section{Compilation of basic constructs}\label{basic-constructs}
 
 This section gives an overview of other common basic syntactical structures
 in OCaml are compiled into C.
 
-\subsection{Variable scoping differences between C and OCaml}
-\label{variable-scoping}
+\subsection{Variable scoping differences between C and OCaml}\label{variable-scoping}
 
 In OCaml, each variable is only visible in the body of the expression where it
 is bound, whether if that's in a let-binding or a function declaration. This is
@@ -107,19 +106,19 @@ has shadowed the first declaration of \texttt{x}, but the original declaration
 of \texttt{x} is still accessible once we leave the inner block (which is also
 the behaviour in OCaml). Therefore, we have to pay careful attention to
 inserting variable scopes to correctly mirror the shadowing effects in
-OCaml\footnote{Note however we cannot apply this process for variable
+OCaml.\footnote{Note however we cannot apply this process for variable
     declarations at the top-level, since you cannot insert block-scopes at the
     top level in C. Unfortunately this requires top-level variables to be
-renamed.}.
+renamed.}
 
-\subsection{Meta-notation for compilation} \label{meta-notation}
+\subsection{Meta-notation for compilation}\label{meta-notation}
 
 To describe the compilation process from OCaml expressions into C we use a
 C-like meta-notation. Recall from \S\ref{expr-stmt}, each OCaml expression
 compiles to a set of C statements and a variable, which the C statements will
 have assigned the correct value to after their execution. We therefore denote
 the set of C statements an expression \textit{\texttt{e}} compiles into as
-\texttt{comp<\textit{e}>}, and the variable it is associated with with
+\texttt{comp<\textit{e}>}, and the variable it is associated with
 \texttt{var<\textit{e}>}. This gives a way of recursively defining the
 compilation process by defining \texttt{comp<\textit{e}>} for all possible OCaml
 expressions. In the actual compiler, the \texttt{comp<>} functions are
@@ -238,14 +237,14 @@ int temp1 = var<$\emph{start}$>;
 int temp2 = var<$\emph{end}$>;
 
 {
-    decl x = temp1;
+    declare x = temp1;
     while (x <= temp2) {
         comp<$\emph{body}$>;
         x++;
     }
 }
 
-decl result = make_unit();
+declare result = make_unit();
 \end{lstlisting}
 
 (Replace \texttt{<=} for \texttt{>=} and \texttt{x++} for \texttt{x--} for 
@@ -278,9 +277,9 @@ There are a few things about this compilation that warrant elaboration:
 \section{\texttt{Lstaticraise} and \texttt{Lstaticcatch}}
 
 The \texttt{Lambda} IR also has support for static exceptions, which are
-exceptions that can only occur across a local scope\footnote{In contrast to
+exceptions that can only occur across a local scope.\footnote{In contrast to
 normal exceptions, which unwind the stack and can jump to an error handler in an
-enclosing scope.}. This is similar to the behaviour of a \texttt{goto} statement
+enclosing scope.} This is similar to the behaviour of a \texttt{goto} statement
 in C. In particular, the OCaml pattern-match compiler may opt to use a static
 exception to avoid duplication of code for certain branches. For example,
 consider this match expression:
@@ -323,7 +322,7 @@ the branch. This behaviour can be emulated with \texttt{goto}s in C.
 and a label, and \texttt{Lstaticraise} expressions are simply compiled into a
 \texttt{goto}.
 
-\section{Functions that return other functions} \label{incomplete-funcs}
+\section{Functions that return other functions}\label{incomplete-funcs}
 
 \S\ref{function-typing} provides a scheme for converting between function types
 in OCaml to function types in C, but this conversion doesn't always make sense.
@@ -347,7 +346,7 @@ type, and apply them to the old result of the function.
 let f x y = (fun y -> x + y) y
 \end{lstlisting}
 
-\section{``Reduced allocations'' mode} \label{reduced-allocs}
+\section{``Reduced allocations'' mode}\label{reduced-allocs}
 
 In the evaluation we mention that since floating point numbers must be boxed to
 be stored in OCaml blocks or polymorphic structures, this makes operations with
@@ -365,18 +364,16 @@ make a separate object on the heap.
         \includegraphics{figs/benchmarks-no-alloc.pdf}
     }
 
-    \caption{Relative speed-up as before in figure~\ref{fig:raw-benchmarks}.
+    \caption{Relative speed-up as before in Figure~\ref{fig:raw-benchmarks}.
     While most of the benchmarks do not change much, note that the speed-up
     times for \texttt{mandelbrot} and \texttt{nbody} increase signficantly to
-    more closely match the native compiler.}
-
-    \label{fig:benchmarks-no-alloc}
+    more closely match the native compiler.}\label{fig:benchmarks-no-alloc}
 \end{figure}
 
 I implemented this mode which is accessible via a C compiler flag, and obtained
 results which demonstrated far more favourable execution times especially for
 the \texttt{mandelbrot} and \texttt{nbody} benchmarks, as can be seen in
-figure~\ref{fig:benchmarks-no-alloc}.
+Figure~\ref{fig:benchmarks-no-alloc}.
 
 While this change does increase the performance of the code generated by the
 compiler, it is worth noting that this means that polymorphic structures are no
@@ -389,16 +386,16 @@ results represent an interesting side scenario that is not suitable for use
 generally. This is possibly fixable with the addition of further run-time
 support for polymorphic structures.
 
-\section{Stack overflow} \label{stack-overflow}
+\section{Stack overflow}\label{stack-overflow}
 
-Curiously, from the benchmark results in figure~\ref{fig:raw-benchmarks}, the
+Curiously, from the benchmark results in Figure~\ref{fig:raw-benchmarks}, the
 executable produced by GCC under all optimisation levels segfaults for the
 benchmark \texttt{sieve}. This is in spite of \texttt{sieve} being written in
 tail-recursive style, and \texttt{clang} being able to produce a working
 executable.
 
 I therefore performed an investigation using M. Godbolt's compiler
-explorer\footnote{\url{https://godbolt.org/}}, and narrowed down the offending
+explorer,\footnote{\url{https://godbolt.org/}} and narrowed down the offending
 code that causes this to the following: 
 
 \begin{lstlisting}[language=C]
@@ -427,17 +424,17 @@ function, and then an immediate increment of the stack pointer again, when it
 would've been equivalent to a \texttt{jmp} instruction to \texttt{g}.
 
 
-\chapter{Debug sessions} \label{debug-sessions}
+\chapter{Debug sessions}\label{debug-sessions}
 
 \section{The ``sum'' program}
 
 \input{appendices/sum_prog.tex}
 
-\section{GDB session of the ``sum'' program} \label{debug-gdb}
+\section{GDB session of the ``sum'' program}\label{debug-gdb}
 
 \input{appendices/gdb_listing.tex}
 
-\section{Ocamldebug session of the ``sum'' program} \label{debug-ocaml}
+\section{Ocamldebug session of the ``sum'' program}\label{debug-ocaml}
 
 \input{appendices/ocamldebug_listing.tex}
 

@@ -56,7 +56,7 @@ x: 'a = <poly>
 
 Compiling to C could take advantage of a different data representation, and GDB
 extensions to customise debugger behaviour, allowing GDB to `see-through'
-polymorphic values such as this..
+polymorphic values such as this.
 
 \subsubsection{Plausibility} There are many language features in OCaml which do
 not have similar analogues in C. Examples of these include algebraic data
@@ -111,7 +111,7 @@ research into various options for different libraries to use.
 \section{Starting point}
 
 The starting point of this project is the existing OCaml
-compiler\footnote{\url{https://github.com/ocaml/ocaml}}, as it would be too
+compiler,\footnote{\url{https://github.com/ocaml/ocaml}} as it would be too
 onerous to duplicate the effort of parsing and performing type inference on
 OCaml source code. Instead, my compiler takes the \texttt{Lambda} intermediate
 representation from the OCaml compiler and compiles this into C. Since the OCaml
@@ -123,8 +123,7 @@ introducing a new compiler backend or different target for compilation.
     \centering
     \input{./figs/compiler_structure.tex}
     \caption{A representation of the various stages in the OCaml compiler. 
-    Adapted from \cite[Chapter~22]{realworldocaml}.}
-    \label{fig:compilerstages}
+    Adapted from \cite[Chapter~22]{realworldocaml}.}\label{fig:compilerstages}
 \end{figure}
 
 The rest of this section will address why this was chosen as the starting 
@@ -134,7 +133,7 @@ starting point was determined.
 \subsection{Intermediate representations}
 
 The OCaml compiler processes code in the pipeline shown in
-figure~\ref{fig:compilerstages}, with the pipeline branching towards the end
+Figure~\ref{fig:compilerstages}, with the pipeline branching towards the end
 into two separate stages representing the targets that the OCaml compiler can
 compile to. Between each stage, a different intermediate representation of the
 code is produced.
@@ -165,7 +164,7 @@ representation would be:
     the source code. This is important for observability and debugging as we
     would like debuggers to display the correct segments of code being debugged.
     This does however present an antagonism, where we would like the IR to be
-    both normalised, but not enough that we cannot recover any source-level
+    normalised, but not enough that we cannot recover any source-level
     information from it.
 
 \end{itemize}
@@ -181,10 +180,10 @@ type information and normalisation.
 
 \subsubsection{\texttt{Typedtree}}
 
-\texttt{Typedtree} is a type-annotated AST which is almost exactly identical to 
-the \texttt{Parsetree} IR, except that expressions have been annotated with a 
-type. This makes this IR highly desirable as the starting point for compilation 
-into C, and was initially where the investigation for a usable intermediate 
+\texttt{Typedtree} is a type-annotated AST which is almost exactly identical to
+the \texttt{Parsetree} IR, except that expressions have been annotated with a
+type. This makes it highly desirable as the starting point for compilation into
+C, and was initially where the investigation for an usable intermediate
 representation started.
 
 However, since \texttt{Typedtree} still almost directly represents the original
@@ -338,7 +337,7 @@ and correctly compiling the more difficult features of OCaml functions into C.
 
 \section{The \texttt{liballocs} library}
 
-\texttt{liballocs}\cite{liballocs} is a library that is able to track all
+\texttt{liballocs} \cite{liballocs} is a library that is able to track all
 allocations in memory and their associated types with no extra required effort.
 It exposes an interface that, when given an arbitrary pointer, is able to return
 information about the type of the value in the allocated memory. This was
@@ -367,7 +366,7 @@ for garbage collection in C. Fortunately, many garbage collectors exist, and the
 Boehm GC\footnote{\url{http://www.hboehm.info/gc/}} was selected and used.
 
 The Boehm GC is a garbage collector for C and C++, which exposes a function
-\texttt{GC\char`_MALLOC} which can works as a replacement for \texttt{malloc}.
+\texttt{GC\char`_MALLOC} which can work as a replacement for \texttt{malloc}.
 Whenever \texttt{GC\char`_MALLOC} is called, it runs the garbage collector by
 scanning the stack for values that could potentially look like pointers and so
 performing garbage collection. This means that in simple cases, it can be used
@@ -377,7 +376,7 @@ as a drop-in solution for GC without extra configuration.
 
 The source code of the compiler was managed using \texttt{git}, the repository
 of which was backed up by publishing to
-GitHub\footnote{\url{https://github.com/t-veor/observable-ocaml}}. Development
+GitHub.\footnote{\url{https://github.com/t-veor/observable-ocaml}} Development
 initially took place on the master branch, but once the compiler approached
 feature completeness new features in the compiler would be developed in a forked
 branch, worked on until they pass the regression tests, and then merged into the
@@ -391,10 +390,10 @@ computer failures.
 \section{Licensing of external code}
 
 The principal body of code being used is the OCaml core
-system\footnote{\url{https://github.com/ocaml/ocaml/blob/4.05/LICENSE}}, which
+system,\footnote{\url{https://github.com/ocaml/ocaml/blob/4.05/LICENSE}} which
 is released under LGPL v2.1. LGPL is a more permissive version of the GPL
-license, intended for use for libraries rather than full pieces of software. The
-LGPL license puts restrictions on what it calls ``derivative works of the
+license, intended to be used for libraries rather than full pieces of software.
+The LGPL license puts restrictions on what it calls ``derivative works of the
 Library'', which are either modifications of the library or other software that
 includes the library or statically link to it, requiring that these derivative
 works are open source and also released with either the LGPL or the GPL library.
@@ -450,11 +449,10 @@ four major sections:
     \centering
     \input{./figs/compiler_pipeline.tex}
     \caption{A representation of the stages in producing an executable output
-    from my compiler, starting from the \texttt{Lambda} IR.}
-    \label{fig:compilerpipeline}
+    from my compiler, starting from the \texttt{Lambda} IR.}\label{fig:compilerpipeline}
 \end{figure}
 
-\section{Obtaining types from the \texttt{Lambda} IR} \label{lambda-types}
+\section{Obtaining types from the \texttt{Lambda} IR}\label{lambda-types}
 
 The \texttt{Lambda} IR does not have any type information associated with it, as
 within the OCaml compiler, \texttt{Lambda} was intended as the last
@@ -466,7 +464,7 @@ of the goals of the project was to have the resulting code be ``observable'',
 which means where possible variables should be of a meaningful type in order to
 be displayed correctly in GDB.
 
-\subsection{\texttt{Lambda} Events} \label{levents}
+\subsection{\texttt{Lambda} Events}\label{levents}
 
 The OCaml compiler inserts \texttt{Lambda} events into the \texttt{Lambda} IR
 when the debug flag is set. A \texttt{Lambda} event is simply a wrapper around
@@ -523,15 +521,15 @@ does the following:
 
 \end{enumerate}
 
-This preliminary pass over the \texttt{Lambda} IR passes the infered types to
+This preliminary pass over the \texttt{Lambda} IR passes the inferred types to
 the \texttt{Ccompile} module.
 
-\section{Representation of C} \label{representation-c}
+\section{Representation of C}\label{representation-c}
 
 Before compilation can start, an appropriate representation of C must be chosen 
 as the compilation target for the compiler.
 
-\subsection{Expressions to statements} \label{expr-stmt}
+\subsection{Expressions to statements}\label{expr-stmt}
 
 OCaml is what is known as an expression-oriented programming language, where
 every syntactical construct is actually an expression of some kind. This is in
@@ -580,17 +578,17 @@ stream, most likely a file. Its functions simply recursively traverse down the
 \texttt{Ccode} representation and prints out the corresponding C as it goes
 along.
 
-\subsection{\texttt{\#}\texttt{line} directives} \label{line-directive}
+\subsection{\texttt{\#}\texttt{line} directives}\label{line-directive}
 
 A key observability feature is for the debugger to associate the currently
 executing machine code with the relevant line from the source.
 
 C compilers support controlling the line and source file of your code with use
 of the \texttt{\#}\texttt{line} directive. This means the compiler can put all
-statements associated with one line of source on the same line\footnote{The line
-    number changes whenever there is a new line, even after being specified with
-\texttt{\#}\texttt{line}.}, interspersed with a \verb|#line| directive whenever
-the source code line actually changes.
+statements associated with one line of source on the same line,\footnote{The
+    line number changes whenever there is a new line, even after being specified
+    with \texttt{\#}\texttt{line}.} interspersed with a \verb|#line| directive
+whenever the source code line actually changes.
 
 To actually obtain information about which line we're on, we again use
 \texttt{Lambda} events (\S\ref{levents}), as they carry information about the
@@ -599,7 +597,7 @@ debugger \texttt{ocamldebug} may pause execution, this gives us a pleasing way
 to treat them: \texttt{Lambda} events simply compile directly into \verb|#line|
 directives.
 
-\section{Compiler basics} \label{compiler-basics}
+\section{Compiler basics}\label{compiler-basics}
 
 Structures from Subset 1 were implemented first, which included basic
 structures, some of which are included below. In the interest of brevity other
@@ -702,7 +700,7 @@ phases:
 
 \end{itemize}
 
-\section{OCaml value representation} \label{value-repr}
+\section{OCaml value representation}\label{value-repr}
 
 This section largely details work undertaken to implement Subset 2, which deals 
 with data representation and the language structures surrounding them.
@@ -757,8 +755,7 @@ between different variants in ADTs.
 \begin{figure}
     \centering
     \input{./figs/block_header.tex}
-    \caption{Example OCaml block containing two values with tag 0.}
-    \label{fig:block-header}
+    \caption{Example OCaml block containing two values with tag 0.}\label{fig:block-header}
 \end{figure}
 
 \subsection{Representation strategy}
@@ -803,11 +800,10 @@ marks the block as containing only \texttt{float}s or \texttt{string}s.
     \input{./figs/block_example.tex}
     \caption{Example box-and-pointer diagram for the list \texttt{[1.0; 2.0;
         3.0]}. Floating point numbers must be boxed to be stored in a block, so
-        a special block is created for each one with the special tag 253.}
-    \label{fig:block-example}
+        a special block is created for each one with the special tag 253.}\label{fig:block-example}
 \end{figure}
 
-\subsection{Representation in C} \label{c-repr}
+\subsection{Representation in C}\label{c-repr}
 
 By taking advantage of flexible array members, it is easy to implement an OCaml 
 block in C.
@@ -821,10 +817,10 @@ typedef struct _block {
 \end{lstlisting}
 
 Recall that a block needs to store its size, an integer tag, and any number of
-other OCaml values. Since OCaml tags only range between 0-255\footnote{In fact,
+other OCaml values. Since OCaml tags only range between 0-255,\footnote{In fact,
     the native OCaml runtime restricts the number of possible variants to 246,
     using the tags 0-245 for variants. It uses the last 10 possible tags for
-special tags.}, and 45 bits are sufficient for storing the size of a block in
+special tags.} and 45 bits are sufficient for storing the size of a block in
 words, we can reduce the amount of space used for the header using C bit-fields.
 This means the header only needs to be one word long.
 
@@ -877,9 +873,9 @@ in machine code.
 storing \verb|value_type|s as well as special blocks that store \verb|double|s
 and \verb|char*|s.
 
-\subsection{Conversion between C types} \label{casting}
+\subsection{Conversion between C types}\label{casting}
 
-Despite the \texttt{Lambda} IR having already gone through type inferencing,
+Despite the \texttt{Lambda} IR having already gone through type inference,
 there are still a few cases in which ``casting'' is necessary. This is because,
 for example, the C types for polymorphic types and monomorphic types in OCaml
 are different, so a C cast is necessary when passing a value of a known type to
@@ -968,7 +964,7 @@ C, one for the integers and one for the tags, which are the two branches of an
 if statement that checks if the value being switched on is an integer or a value
 using the tagged pointer check.
 
-\section{Function compilation and closure conversion} \label{functions}
+\section{Function compilation and closure conversion}\label{functions}
 
 Functions and closures are the final major feature required to compile the
 target subset of OCaml into C. The following sections will discuss the
@@ -983,7 +979,7 @@ nested function declarations are not possible. This is in contrast to OCaml,
 where function definitions are simply expressions like any other, and thus can 
 be defined locally and passed as values. In order to emulate this behaviour in 
 C, whenever we come across a function definition we lift the function 
-definition to the toplevel scope, compile the function there, and then return 
+definition to the top-level scope, compile the function there, and then return 
 its function pointer when we come back.\footnote{This clearly does not deal 
 with lexical closures, so we actually return a pointer to a closure object 
 instead of a function pointer, but the idea is the same.}
@@ -1004,7 +1000,7 @@ $\emph{return\char`_type}$ local_function($\emph{args...}$) {
 declare result = &local_function;
 \end{lstlisting}
 
-\subsection{Function Types in C} \label{function-typing}
+\subsection{Function Types in C}\label{function-typing}
 
 In OCaml, one way of viewing functions is always as functions of one argument,
 which can return other functions. As an example, the function type \texttt{int
@@ -1093,7 +1089,7 @@ as well. This means that all functions are promoted to closures, and all
 function applications in OCaml are compiled into closure calls in C, simplifying
 the implementation at the cost of possible performance losses.
 
-\subsection{Partial application compilation} \label{partial-app}
+\subsection{Partial application compilation}\label{partial-app}
 
 Partial application is one of the major use-cases for closures, and is modelled
 in my compiler using a closure object. Whenever there is a partial application,
@@ -1134,8 +1130,7 @@ cl_g->data[1] = b;
     pointer to \texttt{g} and a pointer to the previous closure object. When 
     \texttt{cl\char`_g} is called with an argument \texttt{c}, \texttt{g} will 
     obtain \texttt{a} and \texttt{b} from the closure object and pass them 
-    together with \texttt{c} to \texttt{f}.}
-    \label{fig:partial-app}
+    together with \texttt{c} to \texttt{f}.}\label{fig:partial-app}
 \end{figure}
 
 \subsubsection{Chaining partial applications}
@@ -1151,7 +1146,7 @@ applies the function.}.
 
 Thus, each closure resulting from partial application points to the closure from
 which it was derived from so their function can figure out what function pointer
-to invoke (see figure~\ref{fig:partial-app}).
+to invoke (see Figure~\ref{fig:partial-app}).
 
 \begin{figure}
     \centering
@@ -1161,8 +1156,7 @@ to invoke (see figure~\ref{fig:partial-app}).
     \texttt{b} separately, creating two closure objects, \texttt{cl\char`_g} in 
     the first application, and \texttt{cl\char`_h} in the second. Here, 
     \texttt{h} translates a call \texttt{h(c)} into \texttt{g(b, c)}, which in 
-    turn translates that call into \texttt{f(a, b, c)}.}
-    \label{fig:double-partial-app}
+    turn translates that call into \texttt{f(a, b, c)}.}\label{fig:double-partial-app}
 \end{figure}
 
 \subsection{Lexical closure compilation}
@@ -1358,7 +1352,7 @@ By tracing through the executions, it can be seen that an application by
 \texttt{x} followed by an application by \texttt{y} gives the correct function 
 call \texttt{f(x, y)}.
 
-\section{Garbage Collection} \label{gc}
+\section{Garbage Collection}\label{gc}
 
 We can use the Boehm GC to implement a garbage collector without needing to
 write one ourselves. Because of the way we have defined the implementation of
@@ -1387,7 +1381,7 @@ for certain workloads they perform much worse. The observability results show
 that basic observability features are possible, and in fact exceed the OCaml
 debugger in some cases.
 
-\section{Regression tests and feature completeness} \label{regression-tests}
+\section{Regression tests and feature completeness}\label{regression-tests}
 
 To test the correctness of the compilation, 21 different regression tests were
 written, testing if different features of the language were being compiled
@@ -1400,7 +1394,7 @@ regression test script was written which compiles the same OCaml program
 against the OCaml native compiler and my compiler, and asserts that the output 
 of both executables match.
 
-\section{Benchmarks} \label{benchmarks}
+\section{Benchmarks}\label{benchmarks}
 
 One natural way of evaluating the compiler is to compare the execution times of
 its output against the output of the OCaml compilers. Therefore, for the
@@ -1426,7 +1420,7 @@ results were plotted using Python and matplotlib.
 \subsection{Sourcing Benchmarks}
 
 Benchmarks programs were taken from the Computer Language Benchmarks Game
-(CLBG)\footnote{\url{https://benchmarksgame-team.pages.debian.net/benchmarksgame/}},
+(CLBG),\footnote{\url{https://benchmarksgame-team.pages.debian.net/benchmarksgame/}}
 the \texttt{operf-micro}\footnote{\url{https://github.com/OCamlPro/operf-micro}}
 OCaml library, and the rest were written by me.  They were chosen to exemplify a
 wide range of features within the OCaml language, particularly to exercise the
@@ -1450,9 +1444,7 @@ on an idle Linux laptop.
     Compiler, or \texttt{ooc}) in combination with \texttt{gcc} and
     \texttt{clang}. The black line represents the baseline of the OCaml bytecode
     compiler, and error bars represent 1 standard deviation in the results.
-    }
-    
-    \label{fig:raw-benchmarks}
+    }\label{fig:raw-benchmarks}
 \end{figure}
 
 On the whole, C compilers do quite well in comparison to the OCaml native
@@ -1511,7 +1503,7 @@ compare the execution of the C executable and the OCaml native executable. We
 can therefore use this profiler to investigate performance differences between
 the OCaml native compiler and the C compiler.
 
-\subsubsection{Floating point and polymorphic structures} \label{float-alloc}
+\subsubsection{Floating point and polymorphic structures}\label{float-alloc}
 
 For example, one discrepancy which we may wish to investigate is the 
 \texttt{mandelbrot} benchmark, which C compilers perform much worse on despite 
@@ -1529,15 +1521,14 @@ having been written in imperative-style code.
         Note that compiling with profiling information inserts extra
         instructions and function calls for instrumentation purposes so the
         times shown are not indicative of how fast the benchmarks execute
-        otherwise.}
-    \label{fig:mandelbrot-gprof}
+        otherwise.}\label{fig:mandelbrot-gprof}
 \end{figure}
 
 I collected profiling information using Gprof from both the native and C
 executables, a truncated version of which\footnote{Since the full output from
 Gprof is not as useful, the reports have been truncated so that at least the top
 95\% of the execution time is represented.} can be seen in
-figure~\ref{fig:mandelbrot-gprof}. As shown, the OCaml executable spends almost
+Figure~\ref{fig:mandelbrot-gprof}. As shown, the OCaml executable spends almost
 100\% of its execution time in the main logic of the program (which is the
 \texttt{entry} function), in comparison to the C executable, which only spends
 44.37\% of the execution time in the main logic. Instead, the majority of the
@@ -1561,7 +1552,7 @@ celestial bodies.
 This unfortunately makes floating point operations very slow, and a solution is
 attempted for this in \S\ref{reduced-allocs}.
 
-\subsubsection{Tail recursion} \label{tail-recursion}
+\subsubsection{Tail recursion}\label{tail-recursion}
 
 Another interesting question to ask is if the C compilers can see through the 
 closure representation to perform tail-call optimisation, since it is far more 
@@ -1593,13 +1584,12 @@ but a small amount of overhead from needing to load in an address.
 \begin{figure}
     \centering
     \input{figs/tail_recursion.tex}
-    \caption{Disassembly of the the function \texttt{let rec add x y = if y = 0 
+    \caption{Disassembly of the function \texttt{let rec add x y = if y = 0 
     then x else add (x - 1) (y + 1)} compiled using my compiler and then using 
     \texttt{gcc -O3}. The compiler is able to optimise the tail call, but is 
     not able to see through the closure representation to optimise into a loop, 
     instead jumping to a function pointer obtained via the closure object (the 
-    pointer to which is initially stored in the \texttt{rdx} register).}
-    \label{fig:tail-recursion}
+    pointer to which is initially stored in the \texttt{rdx} register).}\label{fig:tail-recursion}
 \end{figure}
 
 \subsubsection{Closure creation}
@@ -1611,16 +1601,15 @@ the generated C are far slower than the OCaml native compiler can compile them.
 To confirm this, I collecting profiling information from the \texttt{lens}
 benchmark, which is the most heavy benchmark in terms of closure creation and
 application. The truncated flat profiles can be seen in
-figure~\ref{fig:closure-creation}.
+Figure~\ref{fig:closure-creation}.
 
 \begin{figure}
     \centering
     \input{figs/closure_creation.tex}
     \caption{Truncated Gprof outputs from the \texttt{lens} benchmark, coloured 
-    using the same scheme as before in figure~\ref{fig:mandelbrot-gprof}, with 
+    using the same scheme as before in Figure~\ref{fig:mandelbrot-gprof}, with 
     the addition of yellow functions being related to the closure 
-    creation/application process.}
-    \label{fig:closure-creation}
+    creation/application process.}\label{fig:closure-creation}
 \end{figure}
 
 As can be seen by the results, the execution time of the C executable is 
@@ -1652,9 +1641,9 @@ closure representations.
     seconds. (The final two columns are a result of \S\ref{reduced-allocs}.)}
 \end{figure}
 
-\section{Observability} \label{observability}
+\section{Observability}\label{observability}
 
-The other way to evaluate the the compiler is to determine the observability of 
+The other way to evaluate the compiler is to determine the observability of 
 the compiled output, or how much information we are able to recover about the 
 internal state of the program as it is executing.
 
@@ -1675,13 +1664,13 @@ for both sessions. There are some minor differences with regards to which
 locations the debuggers stop at, and the commands have been altered slightly to
 reflect this.
 
-By loading in a script which enables custom pretty-printers, we are able to 
-observe OCaml values in a nicer representation than printing out raw pointers. 
-In addition, the use of \texttt{\#}\texttt{line} directives has meant that that 
-GDB can display correctly the lines of OCaml code the code it is currently 
-debugging correspond to, allowing breakpoints to be set. Since what is being 
-debugged underneath is essentially just a C program, the full power of GDB's 
-tools can be utilised, including breakpoints, backtraces, watchpoints, etc.
+By loading in a script which enables custom pretty-printers, we are able to
+observe OCaml values in a nicer representation than printing out raw pointers.
+In addition, the use of \texttt{\#}\texttt{line} directives has meant that GDB
+can display correctly the lines of OCaml code the code it is currently debugging
+correspond to, allowing breakpoints to be set. Since what is being debugged
+underneath is essentially just a C program, the full power of GDB's tools can be
+utilised, including breakpoints, backtraces, watchpoints, etc.
 
 \subsection{Identifiers}
 
